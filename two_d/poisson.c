@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "init_kernel.h"
 #include "comp_kernel.h"
 #include "comm_kernel.h"
 #include "solution_kernel.h"
@@ -31,20 +30,29 @@ int main() {
     fptr = fopen("param.txt", "r");
     if(fptr != NULL) {
         // read n
-        fgets(readString, 100, fptr);
-        n = atoi(readString);
+        if(fgets(readString, 100, fptr) != NULL) {
+            n = atoi(readString);
+        } else {
+            printf("Not able to read n\n");
+        }
 
-        // read n_Workers
-        fgets(readString, 100, fptr);
-        n_Workers = atoi(readString);
+        if(fgets(readString, 100, fptr) != NULL) {
+            n_Workers = atoi(readString);
+        } else {
+            printf("Not able to read n_Workers\n");
+        }
 
-        // read it_max
-        fgets(readString, 100, fptr);
-        it_max = atoi(readString);
+        if(fgets(readString, 100, fptr) != NULL) {
+            it_max = atoi(readString);
+        } else {
+            printf("Not able to read it_max\n");
+        }
 
-        // read it_print
-        fgets(readString, 100, fptr);
-        it_print = atoi(readString);
+        if(fgets(readString, 100, fptr) != NULL) {
+            it_print = atoi(readString);
+        } else {
+            printf("Not able to read it_print\n");
+        }
 
         //while(fgets(readString, 100, fptr)) {
         //    printf("%s", readString);
