@@ -1,8 +1,8 @@
 
 TARGET = poisson
 CC = gcc
-CFLAG = -Wall -ggdb
-OBJ = init_kernel.o source_kernel.o comp_kernel.o poisson.o
+CFLAG = # -Wall -ggdb
+OBJ = init_kernel.o source_kernel.o comp_kernel.o poisson.o comm_kernel.o solution_kernel.o
 
 $(TARGET): $(OBJ)
 	$(CC) -o $(TARGET) $(OBJ)

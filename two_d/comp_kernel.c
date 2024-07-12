@@ -53,7 +53,7 @@ void compute(int tid, int ntx, int nty, int nty_local, double h, double *u) {
 
             ll = jj1 + l;
 
-            u[jj2 + l] = 0.25 * (u_tmp[ll - 1] + u_tmp[ll + 1] + u_tmp[ll - ntx] + u_tmp[ll + ntx]) - h2 * source(x, y);
+            u[jj2 + l] = 0.25 * (u_tmp[ll - 1] + u_tmp[ll + 1] + u_tmp[ll - ntx] + u_tmp[ll + ntx] - h2 * source(x, y));
         }
     }
 
@@ -63,12 +63,11 @@ void compute(int tid, int ntx, int nty, int nty_local, double h, double *u) {
         for(l = 0; l < ntx; l++) {
             u[jj2 + l] = u[jj1 + l];
         }
-    } 
-    else {
+    } else {
         for(l = 0; l < ntx; l++) {
             u[ntx + l] = 0.0;
         }
-    } 
+    }
 
     if(jj0 + nty_local != nty) {
         jj1 = (jj0 + nty_local) * ntx;
@@ -76,8 +75,7 @@ void compute(int tid, int ntx, int nty, int nty_local, double h, double *u) {
         for(l = 0; l < ntx; l++) {
             u[jj1 - l - 1] = u[jj2 - l - 1];
         }
-    }
-    else {
+    } else {
         jj1 = (nty - 1) * ntx;
         for(l = 0; l < ntx; l++) {
             u[jj1 - l - 1] = 0.0;

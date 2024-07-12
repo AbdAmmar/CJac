@@ -1,8 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "init_kernel.h"
 #include "comp_kernel.h"
+#include "comm_kernel.h"
+#include "solution_kernel.h"
 
 int main() {
 
@@ -13,13 +16,46 @@ int main() {
     size_t size_u; 
 
     int i, j, ii, jj, jj0, jj1, l;
-    int it, it_max;
+    int it, it_max, it_print;
 
     double L, h;
 
     double* u;
 
-    n = 8;
+    double* err_i;
+    double err;
+
+    FILE *fptr;
+    char readString[100];
+
+    fptr = fopen("param.txt", "r");
+    if(fptr != NULL) {
+        // read n
+        fgets(readString, 100, fptr);
+        n = atoi(readString);
+
+        // read n_Workers
+        fgets(readString, 100, fptr);
+        n_Workers = atoi(readString);
+
+        // read it_max
+        fgets(readString, 100, fptr);
+        it_max = atoi(readString);
+
+        // read it_print
+        fgets(readString, 100, fptr);
+        it_print = atoi(readString);
+
+        //while(fgets(readString, 100, fptr)) {
+        //    printf("%s", readString);
+        //}
+    } else {
+        printf("Not able to open the file param.txt\n");
+    }
+    fclose(fptr);
+
+
+    //n = 128;
     L = 1.0;
     h = L / (double) (n-1);
 
@@ -29,7 +65,7 @@ int main() {
 
 
     // MPI CPUs
-    n_Workers = 4;
+    //n_Workers = 4;
     printf("nb on workers = %d\n", n_Workers);
 
 
@@ -56,57 +92,42 @@ int main() {
     printf("Size of u = %zu Bytes \n\n", size_u);
 
 
-    //for(i = 0; i < n_Workers; i++){
-    //    initalize(i, ntx, nty_local, n_Workers, h, u);
-    //}
-    //for (j = 0; j < nty; j++) {
-    //    jj = j * ntx;
-    //    for (i = 0; i < ntx; i++) {
-    //        ii = jj + i;
-    //        u[ii] = 0.0;
-    //        printf("u[%d] = %f  ", ii, u[ii]);
-    //    }
-    //    printf("\n");
-    //}
+    err_i = (double*) malloc(n_Workers * sizeof(double));
+
 
     it = 0;
-    it_max = 1;
+    //it_max = 100;
+    //it_print = it_max/10;
     while(it < it_max) {
         it++;
-        printf("it = %d/%d\n", it, it_max);
-        for(i = 0; i < n_Workers; i++){
+        for(i = 0; i < n_Workers; i++) {
             compute(i, ntx, nty, nty_local, h, u);
-            // communication(ntx, nty_local, n_Workers, u);
+            err_i[i] = max_error(i, ntx, nty, nty_local, h, u); 
+            communication(i, ntx, nty, nty_local, u);
         }
+        err = err_i[0];
+        for(i = 1; i < n_Workers; i++) {
+            if(err < err_i[i]) {
+                err = err_i[i];
+            }
+        }
+        if(it%it_print == 0)
+            printf("it = %d/%d, error = %f\n", it, it_max, err);
 
-        //for(i = 0; i < n_Workers; i++){
-        //    jj0 = nty_local * i;
+        //for(l = 0; l < n_Workers; l++){
+        //    jj0 = l * nty_local;
         //    for (j = 1; j < nty_local-1; j++) {
-        //        jj1 = jj0 + j * ntx;
+        //        jj1 = (jj0 + j) * ntx;
         //        for (i = 0; i < ntx; i++) {
         //            ii = jj1 + i;
-        //            printf("u[%d] = %f  ", ii, u[ii]);
+        //            printf("%f  ", u[ii]);
         //        }
         //        printf("\n");
         //    }
+        //    printf("\n");
         //}
+        //printf("\n");
 
-        for(l = 0; l < n_Workers; l++){
-            jj0 = l * nty_local;
-            for (j = 1; j < nty_local-1; j++) {
-                jj1 = (jj0 + j) * ntx;
-                //printf("%d %d %d\n", l, jj0, jj1);
-                for (i = 0; i < ntx; i++) {
-                    ii = jj1 + i;
-                    //printf("u[%d] = %f  ", ii, u[ii]);
-                    printf("%f  ", u[ii]);
-                }
-                printf("\n");
-            }
-            printf("\n");
-        }
-
-        printf("\n");
     }
 
 

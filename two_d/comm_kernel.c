@@ -1,28 +1,37 @@
 
-__global__ void communication_kernel(int ntx, int nty_local, int n_Workers, double *u) {
+void communication(int tid, int ntx, int nty, int nty_local, double *u) {
 
-
-    int tid;
     int l;
-    int ii, ll;
+    int jj0, jj1, jj2;
     double tmp;
 
-    tid = threadIdx.x + blockIdx.x * blockDim.x;
+    jj0 = nty_local * tid;
 
-    while (tid < n_Workers) {
-
-        ii = nty_local * tid;
-
+    if(jj0 != 0) {
+        jj1 = (jj0 - 1) * ntx;
+        jj2 = jj1 + ntx;
+        //printf("TOP communication on %d %d\n", jj1, jj2);
         for(l = 0; l < ntx; l++) {
-
-            ll = ii + l
-
-            tmp = u[ll];
-            u[ll] = u[ll-1];
-            u[ll-1] = tmp;
+            //printf("%d <-> %d  ", jj1+l, jj2+l);
+            tmp = u[jj1 + l];
+            u[jj1 + l] = u[jj2 + l];
+            u[jj2 + l] = tmp;
         }
-
-        tid += blockDim.x * gridDim.x;
+        //printf("\n");
     }
+
+    //if((jj0 + nty_local != nty) && (jj0 > 0)) {
+    //    jj1 = (jj0 + nty_local) * ntx;
+    //    jj2 = jj1 + ntx;
+    //    printf("BOTTOM communication on %d %d\n", jj1, jj2);
+    //    for(l = 0; l < ntx; l++) {
+    //        printf("%d <-> %d  ", jj1-l-1, jj2-l-1);
+    //        tmp = u[jj1 - l - 1];
+    //        u[jj1 - l - 1] = u[jj2 - l - 1];
+    //        u[jj2 - l - 1] = tmp;
+    //    }
+    //    printf("\n");
+    //}
+
 }
 
