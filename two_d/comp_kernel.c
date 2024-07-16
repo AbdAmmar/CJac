@@ -57,6 +57,8 @@ void compute(int tid, int ntx, int nty, int nty_local, double h, double *u) {
         }
     }
 
+    free(u_tmp);
+
     if(jj0 != 0) {
         jj1 = (jj0 + 1) * ntx;
         jj2 = jj1 - ntx;

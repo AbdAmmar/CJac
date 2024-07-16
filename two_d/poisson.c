@@ -144,6 +144,7 @@ int main() {
 
 
     free(u);
+    free(err_i);
 
     return 0;
 }
