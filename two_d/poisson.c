@@ -99,6 +99,10 @@ int main() {
     }
     printf("Size of u = %zu Bytes \n\n", size_u);
 
+    for (i = 0; i < ntx * nty; i++) {
+        u[i] = 0.0;
+    }
+
 
     err_i = (double*) malloc(n_Workers * sizeof(double));
 
