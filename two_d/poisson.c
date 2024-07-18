@@ -29,7 +29,7 @@ int main() {
 
     fptr = fopen("param.txt", "r");
     if(fptr != NULL) {
-        // read n
+
         if(fgets(readString, 100, fptr) != NULL) {
             n = atoi(readString);
         } else {
@@ -54,16 +54,12 @@ int main() {
             printf("Not able to read it_print\n");
         }
 
-        //while(fgets(readString, 100, fptr)) {
-        //    printf("%s", readString);
-        //}
     } else {
         printf("Not able to open the file param.txt\n");
     }
     fclose(fptr);
 
 
-    //n = 128;
     L = 1.0;
     h = L / (double) (n-1);
 
@@ -72,8 +68,6 @@ int main() {
     printf("step = %f\n\n", h);
 
 
-    // MPI CPUs
-    //n_Workers = 4;
     printf("nb on workers = %d\n", n_Workers);
 
 
