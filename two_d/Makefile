@@ -1,8 +1,8 @@
 
 TARGET = poisson
-CC = gcc
+CC = /usr/bin/mpicc #gcc
 CFLAG = -O3 -g # -Wall -ggdb
-OBJ = source_kernel.o comp_kernel.o poisson.o comm_kernel.o solution_kernel.o
+OBJ = init_kernel.o source_kernel.o comp_kernel.o poisson.o solution_kernel.o
 
 $(TARGET): $(OBJ)
 	$(CC) -o $(TARGET) $(OBJ)

@@ -12,7 +12,7 @@ double solution(double x, double y) {
 double max_error(int tid, int ntx, int nty, int nty_local, double h, double *u) {
 
     int l;
-    int j, jj0, jj1, jj2, jy;
+    int j, jj0, jj1, jy;
 
     double x, y;
     double tmp, err;
@@ -26,13 +26,12 @@ double max_error(int tid, int ntx, int nty, int nty_local, double h, double *u) 
         y = (double) (jy + j) * h;
 
         jj1 = j * ntx;
-        jj2 = (jj0 + j) * ntx;
 
         for(l = 1; l < ntx-1; l++) {
 
             x = (double) l * h;
 
-            tmp = fabs(u[jj2 + l] - solution(x, y));
+            tmp = fabs(u[jj1 + l] - solution(x, y));
             if(tmp > err) {
                 err = tmp;
             }

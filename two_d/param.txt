@@ -1,4 +1,3 @@
 2048      # n
-1         # n_Workers
 10000     # it_max
 2000      # it_print
