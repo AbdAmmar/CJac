@@ -30,6 +30,9 @@ int main() {
 
     int rang;
 
+    MPI_Comm comm2d;
+    int dims[2], periods[2], neighbor[2];
+
 
     MPI_Init(NULL, NULL);
 
@@ -121,33 +124,46 @@ int main() {
 
 
     init(ntx, nty_local, u);
-    //MPI_Barrier(MPI_COMM_WORLD);
+
+    dims[0] = 1;
+    dims[1] = nWorkers;
+    periods[0] = 0;
+    periods[1] = 0;
+    MPI_Cart_create(MPI_COMM_WORLD, 2, dims, periods, 0, &comm2d);
+    MPI_Cart_shift(comm2d, 1, 1, &neighbor[0], &neighbor[1]);
+    //printf("I process %d, my neighbors are : %d-%d\n", rang, neighbor[0], neighbor[1]);
+
 
     it = 1;
     while(it <= it_max) {
 
         if(it%2 != 0) {
             compute(rang, ntx, nty, nty_local, h, u, u_new);
-            //MPI_Barrier(MPI_COMM_WORLD);
-            if((rang != 0) && ((rang + 1) != nWorkers)) {
-                MPI_Sendrecv(&u_new[(nty_local - 1) * ntx], ntx, MPI_DOUBLE, rang+1, 0, 
-                             &u_new[ntx],                   ntx, MPI_DOUBLE, rang+1, 0, 
-                             MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            }
-            //MPI_Barrier(MPI_COMM_WORLD);
+
+            MPI_Sendrecv(&u_new[0],                     ntx, MPI_DOUBLE, neighbor[0], 0, 
+                         &u_new[(nty_local - 2) * ntx], ntx, MPI_DOUBLE, neighbor[1], 0, 
+                         comm2d, MPI_STATUS_IGNORE);
+
+            MPI_Sendrecv(&u_new[(nty_local - 1) * ntx], ntx, MPI_DOUBLE, neighbor[1], 0, 
+                         &u_new[ntx],                   ntx, MPI_DOUBLE, neighbor[0], 0, 
+                         comm2d, MPI_STATUS_IGNORE);
+
         } else {
+
             compute(rang, ntx, nty, nty_local, h, u_new, u);
-            //MPI_Barrier(MPI_COMM_WORLD);
-            if((rang != 0) && ((rang + 1) != nWorkers)) {
-                MPI_Sendrecv(&u[(nty_local - 1) * ntx], ntx, MPI_DOUBLE, rang+1, 0, 
-                             &u[ntx],                   ntx, MPI_DOUBLE, rang+1, 0, 
-                             MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            }
-            //MPI_Barrier(MPI_COMM_WORLD);
+
+            MPI_Sendrecv(&u[0],                     ntx, MPI_DOUBLE, neighbor[0], 0, 
+                         &u[(nty_local - 2) * ntx], ntx, MPI_DOUBLE, neighbor[1], 0, 
+                         comm2d, MPI_STATUS_IGNORE);
+
+            MPI_Sendrecv(&u[(nty_local - 1) * ntx], ntx, MPI_DOUBLE, neighbor[1], 0, 
+                         &u[ntx],                   ntx, MPI_DOUBLE, neighbor[0], 0, 
+                         comm2d, MPI_STATUS_IGNORE);
+
         }
 
         if(it%it_print == 0) {
-            err_local = max_error(rang, ntx, nty, nty_local, h, u); 
+            err_local = max_error(rang, ntx, nty_local, h, u); 
             MPI_Allreduce(&err_local, &err, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD); 
             if(rang == 0) {
                 printf("it = %d/%d, error = %f\n", it, it_max, err);
