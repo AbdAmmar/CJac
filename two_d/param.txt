@@ -1,4 +1,4 @@
-128      # n
-4        # n_Workers
-10000    # it_max
-1000     # it_print
+2048      # n
+1         # n_Workers
+10000     # it_max
+2000      # it_print

@@ -8,6 +8,7 @@ double solution(double x, double y) {
 
 }
 
+
 double max_error(int tid, int ntx, int nty, int nty_local, double h, double *u) {
 
     int l;

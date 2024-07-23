@@ -42,7 +42,6 @@ void compute(int tid, int ntx, int nty, int nty_local, double h, double *u) {
     for(j = 1; j < nty_local-1; j++) {
 
         y = (double) (jy + j) * h;
-        //printf("y = %f\n", y);
 
         jj1 = j * ntx;
         jj2 = (jj0 + j) * ntx;

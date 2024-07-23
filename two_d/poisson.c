@@ -85,13 +85,13 @@ int main() {
 
 
     size_u = ntx * nty * sizeof(double);
+    printf("Size of u = %zu Bytes \n\n", size_u);
 
     u = (double*) malloc(size_u);
     if(u == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
+        fprintf(stderr, "Memory allocation failed for u\n");
         exit(0);
     }
-    printf("Size of u = %zu Bytes \n\n", size_u);
 
     for (i = 0; i < ntx * nty; i++) {
         u[i] = 0.0;
@@ -99,26 +99,35 @@ int main() {
 
 
     err_i = (double*) malloc(n_Workers * sizeof(double));
+    if(err_i == NULL) {
+        fprintf(stderr, "Memory allocation failed for err_i\n");
+        exit(0);
+    }
 
 
-    it = 0;
-    //it_max = 100;
-    //it_print = it_max/10;
-    while(it < it_max) {
-        it++;
+    it = 1;
+    while(it <= it_max) {
+
         for(i = 0; i < n_Workers; i++) {
             compute(i, ntx, nty, nty_local, h, u);
-            err_i[i] = max_error(i, ntx, nty, nty_local, h, u); 
-            communication(i, ntx, nty, nty_local, u);
+            communication(i, ntx, nty_local, u);
         }
-        err = err_i[0];
-        for(i = 1; i < n_Workers; i++) {
-            if(err < err_i[i]) {
-                err = err_i[i];
+
+
+        if(it%it_print == 0) {
+            for(i = 0; i < n_Workers; i++) {
+                err_i[i] = max_error(i, ntx, nty, nty_local, h, u); 
             }
-        }
-        if(it%it_print == 0)
+            err = err_i[0];
+            for(i = 1; i < n_Workers; i++) {
+                if(err < err_i[i]) {
+                    err = err_i[i];
+                }
+            }
             printf("it = %d/%d, error = %f\n", it, it_max, err);
+        }
+
+        it++;
 
         //for(l = 0; l < n_Workers; l++){
         //    jj0 = l * nty_local;
@@ -133,8 +142,21 @@ int main() {
         //    printf("\n");
         //}
         //printf("\n");
-
     }
+
+    //for(l = 0; l < n_Workers; l++){
+    //    jj0 = l * nty_local;
+    //    for (j = 1; j < nty_local-1; j++) {
+    //        jj1 = (jj0 + j) * ntx;
+    //        for (i = 0; i < ntx; i++) {
+    //            ii = jj1 + i;
+    //            printf("%f  ", u[ii]);
+    //        }
+    //        printf("\n");
+    //    }
+    //    printf("\n");
+    //}
+    //printf("\n");
 
 
     free(u);
