@@ -1,4 +1,5 @@
 
 *.o
 poisson
-maqao
+maqao/
+RES/
