@@ -5,7 +5,7 @@ HOSTNAME = TURPAN
 ifeq ($(HOSTNAME), MYPC)
 	CC = /usr/bin/mpicc
 else ifeq ($(HOSTNAME), TURPAN)
-	CC = /usr/local/openmpi/nvidia/4.1.6-opt/bin/mpicc
+	CC = /usr/local/openmpi/arm/4.1.4-cpu/bin/mpicc
 else
 	CC = gcc
 endif
