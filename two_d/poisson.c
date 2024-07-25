@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <mpi.h>
+#include <time.h>
 
+#include "utils.h"
 #include "init_kernel.h"
 #include "comp_kernel.h"
 #include "solution_kernel.h"
@@ -15,7 +17,6 @@ int main() {
 
     size_t size_u; 
 
-    int i, j, ii, jj, jj0, jj1, l;
     int it, it_max, it_print;
 
     double L, h;
@@ -28,20 +29,30 @@ int main() {
     FILE *fptr;
     char readString[100];
 
-    int rang;
+    int rank;
+    double start_time, end_time, total_time;
+    double cpu_time, cpu_total_time;
+    clock_t cpu_start_time, cpu_end_time;
+
 
     MPI_Comm comm2d;
     int dims[2], periods[2], neighbor[2];
 
 
+
     MPI_Init(NULL, NULL);
 
     MPI_Comm_size(MPI_COMM_WORLD, &nWorkers);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rang);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    //printf("Je suis le processus %d parmi %d\n", rang, nWorkers);
+    cpu_start_time = clock();
 
-    if(rang == 0) {
+
+    //printf("Je suis le processus %d parmi %d\n", rank, nWorkers);
+
+    if(rank == 0) {
+
+        start_time = MPI_Wtime();
 
         fptr = fopen("param.txt", "r");
         if(fptr != NULL) {
@@ -98,7 +109,7 @@ int main() {
         size_u = ntx * nty * sizeof(double);
         printf("Size of u = %zu Bytes \n\n", size_u);
 
-    } // end if(rang == 0)
+    } // end if(rank == 0)
 
 
     MPI_Bcast(&ntx, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -131,14 +142,14 @@ int main() {
     periods[1] = 0;
     MPI_Cart_create(MPI_COMM_WORLD, 2, dims, periods, 0, &comm2d);
     MPI_Cart_shift(comm2d, 1, 1, &neighbor[0], &neighbor[1]);
-    //printf("I process %d, my neighbors are : %d-%d\n", rang, neighbor[0], neighbor[1]);
+    //printf("I process %d, my neighbors are : %d-%d\n", rank, neighbor[0], neighbor[1]);
 
 
     it = 1;
     while(it <= it_max) {
 
         if(it%2 != 0) {
-            compute(rang, ntx, nty, nty_local, h, u, u_new);
+            compute(rank, ntx, nty, nty_local, h, u, u_new);
 
             MPI_Sendrecv(&u_new[0],                     ntx, MPI_DOUBLE, neighbor[0], 0, 
                          &u_new[(nty_local - 2) * ntx], ntx, MPI_DOUBLE, neighbor[1], 0, 
@@ -150,7 +161,7 @@ int main() {
 
         } else {
 
-            compute(rang, ntx, nty, nty_local, h, u_new, u);
+            compute(rank, ntx, nty, nty_local, h, u_new, u);
 
             MPI_Sendrecv(&u[0],                     ntx, MPI_DOUBLE, neighbor[0], 0, 
                          &u[(nty_local - 2) * ntx], ntx, MPI_DOUBLE, neighbor[1], 0, 
@@ -163,50 +174,39 @@ int main() {
         }
 
         if(it%it_print == 0) {
-            err_local = max_error(rang, ntx, nty_local, h, u); 
+            err_local = max_error(rank, ntx, nty_local, h, u); 
             MPI_Allreduce(&err_local, &err, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD); 
-            if(rang == 0) {
+            if(rank == 0) {
                 printf("it = %d/%d, error = %f\n", it, it_max, err);
             }
         }
 
         it++;
 
-        //for(l = 0; l < nWorkers; l++){
-        //    jj0 = l * nty_local;
-        //    for (j = 1; j < nty_local-1; j++) {
-        //        jj1 = (jj0 + j) * ntx;
-        //        for (i = 0; i < ntx; i++) {
-        //            ii = jj1 + i;
-        //            printf("%f  ", u[ii]);
-        //        }
-        //        printf("\n");
-        //    }
-        //    printf("\n");
-        //}
-        //printf("\n");
     }
 
-    //for(l = 0; l < nWorkers; l++){
-    //    jj0 = l * nty_local;
-    //    for (j = 1; j < nty_local-1; j++) {
-    //        jj1 = (jj0 + j) * ntx;
-    //        for (i = 0; i < ntx; i++) {
-    //            ii = jj1 + i;
-    //            printf("%f  ", u[ii]);
-    //        }
-    //        printf("\n");
-    //    }
-    //    printf("\n");
-    //}
-    //printf("\n");
-
+    //print_mat(ntx, nty_local, nWorkers, u);
 
     free(u);
     free(u_new);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    cpu_end_time = clock();
+    cpu_time = ((double) (cpu_end_time - cpu_start_time)) / CLOCKS_PER_SEC;
+    MPI_Reduce(&cpu_time, &cpu_total_time, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        end_time = MPI_Wtime();
+        total_time = end_time - start_time;
+
+        printf("\nTotal wall-clock computation time: %f seconds\n", total_time);
+        printf("Total CPU computation time: %f seconds\n", cpu_total_time);
+    }
 
     MPI_Finalize();
 
     return 0;
 }
+
 

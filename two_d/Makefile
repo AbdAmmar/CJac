@@ -1,8 +1,21 @@
 
+#HOSTNAME = MYPC
+HOSTNAME = TURPAN
+
+ifeq ($(HOSTNAME), MYPC)
+	CC = /usr/bin/mpicc
+else ifeq ($(HOSTNAME), TURPAN)
+	CC = /usr/local/openmpi/nvidia/4.1.6-opt/bin/mpicc
+else
+	CC = gcc
+endif
+
+
 TARGET = poisson
-CC = /usr/bin/mpicc #gcc
+
 CFLAG = -O3 -g # -Wall -ggdb
-OBJ = init_kernel.o source_kernel.o comp_kernel.o poisson.o solution_kernel.o
+
+OBJ = utils.o init_kernel.o source_kernel.o comp_kernel.o poisson.o solution_kernel.o
 
 $(TARGET): $(OBJ)
 	$(CC) -o $(TARGET) $(OBJ)
