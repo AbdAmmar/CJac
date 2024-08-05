@@ -59,3 +59,64 @@ void compute(int tid, int ntx, int nty, int nty_local, double h, double* u_old, 
 }
 
 
+
+void compute_row(int j, int tid, int ntx, int nty, int nty_local, double h, double* u_old, double *u_new) {
+
+    int l, ll;
+    int jj0, jj1, jy;
+
+    double x, y, h2;
+
+    jj0 = nty_local * tid;
+
+    jy = jj0 - 2 * tid - 1;
+    h2 = h * h;
+    
+    y = (double) (jy + j) * h;
+    
+    jj1 = j * ntx;
+    
+    for(l = 1; l < ntx-1; l++) {
+    
+        x = (double) l * h;
+    
+        ll = jj1 + l;
+    
+        u_new[ll] = 0.25 * (u_old[ll - 1] + u_old[ll + 1] + u_old[ll - ntx] + u_old[ll + ntx] - h2 * source(x, y));
+    }
+
+}
+
+
+
+void compute_row_bc(int tid, int ntx, int nty, int nty_local, double h, double *u_new) {
+
+    int l;
+    int jj0, jj1, jj2;
+
+    jj0 = nty_local * tid;
+
+    if(jj0 == 0) {
+        for(l = ntx; l < 2*ntx; l++) {
+            u_new[l] = 0.0;
+        }
+    } else {
+        for(l = 0; l < ntx; l++) {
+            u_new[l] = u_new[ntx + l];
+        }
+    }
+
+    if(jj0 + nty_local == nty) {
+        jj1 = (nty_local - 1) * ntx;
+        for(l = 0; l < ntx; l++) {
+            u_new[jj1 - l - 1] = 0.0;
+        }
+    } else {
+        jj1 = nty_local * ntx;
+        jj2 = jj1 - ntx;
+        for(l = 0; l < ntx; l++) {
+            u_new[jj1 - l - 1] = u_new[jj2 - l - 1];
+        }
+    }
+
+}

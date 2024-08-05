@@ -3,6 +3,7 @@
 #include <string.h>
 #include <mpi.h>
 #include <time.h>
+#include <omp.h>
 
 #include "utils.h"
 #include "init_kernel.h"
@@ -14,6 +15,8 @@ int main() {
     int n;
     int ntx, nty;
     int nWorkers, nty_local;
+
+    int j;
 
     size_t size_u; 
 
@@ -149,7 +152,16 @@ int main() {
     while(it <= it_max) {
 
         if(it%2 != 0) {
-            compute(rank, ntx, nty, nty_local, h, u, u_new);
+
+            #pragma omp parallel \
+                default(none)    \
+                private(j)       \
+                shared(rank, ntx, nty, nty_local, h, u, u_new)
+            for(j = 1; j < nty_local-1; j++) {
+                compute_row(j, rank, ntx, nty, nty_local, h, u, u_new);
+            }
+
+            compute_row_bc(rank, ntx, nty, nty_local, h, u_new);
 
             MPI_Sendrecv(&u_new[0],                     ntx, MPI_DOUBLE, neighbor[0], 0, 
                          &u_new[(nty_local - 2) * ntx], ntx, MPI_DOUBLE, neighbor[1], 0, 
@@ -161,7 +173,15 @@ int main() {
 
         } else {
 
-            compute(rank, ntx, nty, nty_local, h, u_new, u);
+            #pragma omp parallel \
+                default(none)    \
+                private(j)       \
+                shared(rank, ntx, nty, nty_local, h, u, u_new)
+            for(j = 1; j < nty_local-1; j++) {
+                compute_row(j, rank, ntx, nty, nty_local, h, u_new, u);
+            }
+
+            compute_row_bc(rank, ntx, nty, nty_local, h, u);
 
             MPI_Sendrecv(&u[0],                     ntx, MPI_DOUBLE, neighbor[0], 0, 
                          &u[(nty_local - 2) * ntx], ntx, MPI_DOUBLE, neighbor[1], 0, 

@@ -1,6 +1,6 @@
 
-#HOSTNAME = MYPC
-HOSTNAME = TURPAN
+HOSTNAME = MYPC
+#HOSTNAME = TURPAN
 
 ifeq ($(HOSTNAME), MYPC)
 	CC = /usr/bin/mpicc
