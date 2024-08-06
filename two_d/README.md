@@ -2,7 +2,7 @@
 
 ## Table of Contents
 - [Problem Statement](#Problem-Statement)
-- [Finite Difference Method](#Finite-Problem-Statement)
+- [Finite Difference Method](#Finite-Difference-Method)
 - [usage](#usage)
 
 ## Problem Statement
