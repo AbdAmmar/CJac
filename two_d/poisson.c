@@ -64,18 +64,21 @@ int main() {
                 n = atoi(readString);
             } else {
                 printf("Not able to read n\n");
+                MPI_Abort(MPI_COMM_WORLD, -1);
             }
 
             if(fgets(readString, 100, fptr) != NULL) {
                 it_max = atoi(readString);
             } else {
                 printf("Not able to read it_max\n");
+                MPI_Abort(MPI_COMM_WORLD, -1);
             }
 
             if(fgets(readString, 100, fptr) != NULL) {
                 it_print = atoi(readString);
             } else {
                 printf("Not able to read it_print\n");
+                MPI_Abort(MPI_COMM_WORLD, -1);
             }
 
         } else {
@@ -110,7 +113,7 @@ int main() {
 
 
         size_u = ntx * nty * sizeof(double);
-        printf("Size of u = %zu Bytes \n\n", size_u);
+        printf("Size of u = %.2f MB \n\n", (double)size_u/(1024.0*1024.0));
 
     } // end if(rank == 0)
 
@@ -153,12 +156,12 @@ int main() {
 
         if(it%2 != 0) {
 
-            #pragma omp parallel \
-                default(none)    \
-                private(j)       \
-                shared(rank, ntx, nty, nty_local, h, u, u_new)
-            for(j = 1; j < nty_local-1; j++) {
-                compute_row(j, rank, ntx, nty, nty_local, h, u, u_new);
+            #pragma omp parallel default(none) private(j) shared(rank, ntx, nty, nty_local, h, u, u_new)
+            {
+                #pragma omp for
+                for(j = 1; j < nty_local-1; j++) {
+                    compute_row(j, rank, ntx, nty, nty_local, h, u, u_new);
+                }
             }
 
             compute_row_bc(rank, ntx, nty, nty_local, h, u_new);
@@ -173,12 +176,12 @@ int main() {
 
         } else {
 
-            #pragma omp parallel \
-                default(none)    \
-                private(j)       \
-                shared(rank, ntx, nty, nty_local, h, u, u_new)
-            for(j = 1; j < nty_local-1; j++) {
-                compute_row(j, rank, ntx, nty, nty_local, h, u_new, u);
+            #pragma omp parallel default(none) private(j) shared(rank, ntx, nty, nty_local, h, u, u_new)
+            {
+                #pragma omp for
+                for(j = 1; j < nty_local-1; j++) {
+                    compute_row(j, rank, ntx, nty, nty_local, h, u_new, u);
+                }
             }
 
             compute_row_bc(rank, ntx, nty, nty_local, h, u);

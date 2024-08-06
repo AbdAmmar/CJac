@@ -1,6 +1,6 @@
 
-HOSTNAME = MYPC
-#HOSTNAME = TURPAN
+#HOSTNAME = MYPC
+HOSTNAME = TURPAN
 
 ifeq ($(HOSTNAME), MYPC)
 	CC = /usr/bin/mpicc
@@ -13,16 +13,16 @@ endif
 
 TARGET = poisson
 
-CFLAG = -O3 -g # -Wall -ggdb
+CFLAGS = -O3 -fopenmp # -g -Wall -ggdb
 
 OBJ = utils.o init_kernel.o source_kernel.o comp_kernel.o poisson.o solution_kernel.o
 
 $(TARGET): $(OBJ)
-	$(CC) -o $(TARGET) $(OBJ)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJ)
 
 %.o: %.c
-	$(CC) $(CFLAG) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:
-	rm *.o poisson
+	rm -rf *.o poisson
