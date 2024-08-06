@@ -25,6 +25,6 @@ echo "nb of tasks per node = $SLURM_NTASKS_PER_NODE"
 echo "nb of tasks = $SLURM_NTASKS"
 echo "nb of threads per task = $OMP_NUM_THREADS"
 
-mpirun --bind-to none -np $SLURM_NTASKS ./poisson
+mpirun --bind-to none -np $SLURM_NTASKS ./bin/poisson
 #./poisson
 
