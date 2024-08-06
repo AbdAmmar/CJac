@@ -1,17 +1,17 @@
 #!/bin/bash
 #SBATCH -J jacobi
 
-#SBATCH --nodes=1 --exclusive 
+#SBATCH --nodes=15 --exclusive 
 
-#SBATCH --ntasks=1
+#SBATCH --ntasks=15
 #SBATCH --ntasks-per-node=1
 
 #SBATCH --cpus-per-task=80
 
 #SBATCH --time=1:00:00
-#SBATCH -p small
+##SBATCH -p small
 ###SBATCH -p big
-###SBATCH -p full
+#SBATCH -p full
 
 
 module purge
@@ -26,5 +26,4 @@ echo "nb of tasks = $SLURM_NTASKS"
 echo "nb of threads per task = $OMP_NUM_THREADS"
 
 mpirun --bind-to none -np $SLURM_NTASKS ./bin/poisson
-#./poisson
 

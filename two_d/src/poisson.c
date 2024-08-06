@@ -14,7 +14,8 @@ int main() {
 
     int n;
     int ntx, nty;
-    int nWorkers, nty_local;
+    int nWorkers_MPI, nty_local;
+    int nWorkers_OpenMP;
 
     int j;
 
@@ -45,13 +46,13 @@ int main() {
 
     MPI_Init(NULL, NULL);
 
-    MPI_Comm_size(MPI_COMM_WORLD, &nWorkers);
+    MPI_Comm_size(MPI_COMM_WORLD, &nWorkers_MPI);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     cpu_start_time = clock();
 
 
-    //printf("Je suis le processus %d parmi %d\n", rank, nWorkers);
+    //printf("Je suis le processus %d parmi %d\n", rank, nWorkers_MPI);
 
     if(rank == 0) {
 
@@ -96,13 +97,21 @@ int main() {
         printf("step = %f\n\n", h);
 
 
-        printf("nb on workers = %d\n", nWorkers);
+        #pragma omp parallel
+        {
+            #pragma omp master
+            {
+                nWorkers_OpenMP = omp_get_num_threads();
+            }
+        }
+        printf("nb on MPI processes = %d\n", nWorkers_MPI);
+        printf("nb on OpenMP threads = %d\n", nWorkers_OpenMP);
 
 
         ntx = n;
-        nty = n + 2 * nWorkers;
-        nty_local = n / nWorkers + 2;
-        if(nty != nty_local*nWorkers) {
+        nty = n + 2 * nWorkers_MPI;
+        nty_local = n / nWorkers_MPI + 2;
+        if(nty != nty_local*nWorkers_MPI) {
             printf("Unconsistent dimensions\n");
             MPI_Abort(MPI_COMM_WORLD, -1);
         }
@@ -121,7 +130,7 @@ int main() {
     MPI_Bcast(&ntx, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&nty, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&nty_local, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Bcast(&nWorkers, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&nWorkers_MPI, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&it_max, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&it_print, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&h, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -143,7 +152,7 @@ int main() {
     init(ntx, nty_local, u);
 
     dims[0] = 1;
-    dims[1] = nWorkers;
+    dims[1] = nWorkers_MPI;
     periods[0] = 0;
     periods[1] = 0;
     MPI_Cart_create(MPI_COMM_WORLD, 2, dims, periods, 0, &comm2d);
@@ -208,7 +217,7 @@ int main() {
 
     }
 
-    //print_mat(ntx, nty_local, nWorkers, u);
+    //print_mat(ntx, nty_local, nWorkers_MPI, u);
 
     free(u);
     free(u_new);
