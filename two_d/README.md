@@ -4,6 +4,7 @@
 - [Problem Statement](#Problem-Statement)
 - [Finite Difference Method](#Finite-Difference-Method)
 - [usage](#usage)
+- [Scaling with Number of Threads on One Node](#Scaling-with-Number-of-Threads-on-One-Node)
 
 ## Problem Statement
 
@@ -83,3 +84,32 @@ Execute the compiled binary to start the simulation. Use `mpirun` with the appro
 ```bash
 mpirun --bind-to none -np <num_processes> ./bin/poisson
 ```
+
+## Scaling with Number of Threads on One Node
+
+In this section, we present a test of the scaling of the code on a node of the machine 
+[TURPAN](https://www.mesonet.fr/documentation/user-documentation/arch_exp/turpan/). 
+The performance was evaluated using an Ampere Altra Q80-30, which has 80 ARM v8.2 cores 
+running at 3 GHz.
+
+<!--
+//We analyzed the performance in terms of two key aspects:
+//
+//1. **Wall Time vs Number of Threads**: This plot shows how the execution time of the code 
+//changes as the number of threads varies.
+//2. **Acceleration Factor vs Number of Threads**: This plot illustrates the acceleration factor, 
+//which measures how the performance improves relative to the number of threads.
+-->
+
+### Wall Time vs Number of Threads
+
+The following plot shows how the wall time varies with the number of threads:
+
+![Wall Time vs Number of Threads](RES/TURPAN/one_node/wall_time.png)
+
+### Acceleration Factor vs Number of Threads
+
+The following plot shows the acceleration factor, which illustrates how the performance scales with increasing threads:
+
+![Acceleration Factor vs Number of Threads](RES/TURPAN/one_node/acceleration_factor.png)
+
