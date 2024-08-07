@@ -85,31 +85,41 @@ Execute the compiled binary to start the simulation. Use `mpirun` with the appro
 mpirun --bind-to none -np <num_processes> ./bin/poisson
 ```
 
-## Scaling with Number of Threads on One Node
+## Scaling with Number of Cores and Nodes
 
-In this section, we present a test of the scaling of the code on a node of the machine 
-[TURPAN](https://www.mesonet.fr/documentation/user-documentation/arch_exp/turpan/). 
-The performance was evaluated using an Ampere Altra Q80-30, which has 80 ARM v8.2 cores 
-running at 3 GHz.
+In this section, we present a test of the code scaling performance on the 
+[TURPAN](https://www.mesonet.fr/documentation/user-documentation/arch_exp/turpan/) machine. 
+The evaluation was conducted using nodes equipped with Ampere Altra Q80-30 processors, featuring 
+80 ARM v8.2 cores running at 3 GHz. The parameters used for this test are `n=4800`, `it_max=10000`, and `it_print=2000`.
 
-<!--
-//We analyzed the performance in terms of two key aspects:
-//
-//1. **Wall Time vs Number of Threads**: This plot shows how the execution time of the code 
-//changes as the number of threads varies.
-//2. **Acceleration Factor vs Number of Threads**: This plot illustrates the acceleration factor, 
-//which measures how the performance improves relative to the number of threads.
--->
 
-### Wall Time vs Number of Threads
+### Scaling with Number of Threads
 
-The following plot shows how the wall time varies with the number of threads:
+#### Wall Time vs Number of Threads
 
-![Wall Time vs Number of Threads](RES/TURPAN/one_node/wall_time.png)
+The plot below shows the variation in wall time as the number of threads increases:
 
-### Acceleration Factor vs Number of Threads
+![Wall Time vs Number of Threads](RES/one_node/wall_time.png)
 
-The following plot shows the acceleration factor, which illustrates how the performance scales with increasing threads:
+#### Acceleration Factor vs Number of Threads
 
-![Acceleration Factor vs Number of Threads](RES/TURPAN/one_node/acceleration_factor.png)
+The following plot illustrates the acceleration factor, demonstrating the performance scaling with an increasing number of threads:
+
+![Acceleration Factor vs Number of Threads](RES/one_node/acceleration_factor.png)
+
+
+### Scaling with Number of Nodes
+
+#### Wall Time vs Number of Nodes
+
+The plot below shows the variation in wall time as the number of nodes increases:
+
+![Wall Time vs Number of Threads](RES/n_node/wall_time.png)
+
+#### Acceleration Factor vs Number of Nodes
+
+The following plot illustrates the acceleration factor, demonstrating the performance scaling with an increasing number of nodes:
+
+![Acceleration Factor vs Number of Threads](RES/n_node/acceleration_factor.png)
+
 
